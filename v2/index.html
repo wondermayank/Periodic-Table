@@ -1,0 +1,1423 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Periodic Table — wondermayank</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg2: #f7f7f5;
+    --bg3: #efefeb;
+    --border: #e0ddd8;
+    --border2: #c8c4bc;
+    --text: #1a1916;
+    --text2: #6b6860;
+    --text3: #9b9890;
+    --accent: #1a56db;
+    --accent2: #e8f0fe;
+    --panel-w: 380px;
+    --header-h: 56px;
+
+    --c-alkali: #ff8a80; --c-alkali-t: #7a1206;
+    --c-alkaline: #ff80ab; --c-alkaline-t: #7a0634;
+    --c-transition: #ea80fc; --c-transition-t: #5e0579;
+    --c-post: #b388ff; --c-post-t: #2a0684;
+    --c-metalloid: #8c9eff; --c-metalloid-t: #1a2d8f;
+    --c-nonmetal: #82b1ff; --c-nonmetal-t: #0d3580;
+    --c-halogen: #80d8ff; --c-halogen-t: #035579;
+    --c-noble: #84ffff; --c-noble-t: #006464;
+    --c-lanthanide: #a7ffeb; --c-lanthanide-t: #005040;
+    --c-actinide: #b9f6ca; --c-actinide-t: #0a4019;
+    --c-unknown: #e6ee9c; --c-unknown-t: #4a4e08;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ─── HEADER ─────────────────────────────────────────── */
+  header {
+    height: var(--header-h);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    position: relative;
+    z-index: 200;
+    flex-shrink: 0;
+  }
+  .brand {
+    font-family: 'Fraunces', serif;
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .brand-atom { font-size: 22px; }
+  .brand-sub { font-size: 10px; font-weight: 400; font-family: 'DM Mono', monospace; color: var(--text3); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 1px; }
+  .brand-stack { display: flex; flex-direction: column; }
+
+  .search-wrap { position: relative; width: 260px; }
+  .search-wrap input {
+    width: 100%;
+    height: 34px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0 12px 0 36px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-wrap input:focus { border-color: var(--accent); background: var(--bg); }
+  .search-wrap input::placeholder { color: var(--text3); }
+  .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 14px; color: var(--text3); pointer-events: none; }
+  .search-clear { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text3); font-size: 14px; display: none; }
+  .search-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+    z-index: 1000;
+    max-height: 340px;
+    overflow-y: auto;
+    display: none;
+  }
+  .search-results.open { display: block; }
+  .sr-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.1s;
+    border-bottom: 1px solid var(--border);
+  }
+  .sr-item:last-child { border-bottom: none; }
+  .sr-item:hover { background: var(--bg2); }
+  .sr-sym { width: 32px; height: 32px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .sr-info { flex: 1; }
+  .sr-name { font-size: 12px; font-weight: 500; color: var(--text); }
+  .sr-meta { font-size: 10px; color: var(--text3); margin-top: 1px; }
+  .sr-section { padding: 6px 12px 4px; font-size: 10px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; background: var(--bg2); }
+
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .hdr-btn {
+    height: 32px;
+    padding: 0 12px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .hdr-btn:hover { background: var(--bg2); border-color: var(--border2); color: var(--text); }
+  .hdr-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* ─── BREADCRUMB ──────────────────────────────────────── */
+  .breadcrumb {
+    height: 36px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text3);
+    flex-shrink: 0;
+    z-index: 100;
+  }
+  .bc-link { cursor: pointer; color: var(--accent); transition: opacity 0.1s; }
+  .bc-link:hover { opacity: 0.7; }
+  .bc-sep { color: var(--text3); }
+  .bc-current { color: var(--text2); }
+  .back-btn {
+    margin-left: auto;
+    height: 24px;
+    padding: 0 10px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .back-btn:hover { background: var(--bg3); }
+
+  /* ─── MAIN ────────────────────────────────────────────── */
+  main {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ─── THREE.JS CANVAS ─────────────────────────────────── */
+  #canvas-container {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  #canvas-container canvas { display: block; }
+
+  /* ─── TOOLTIP ─────────────────────────────────────────── */
+  #element-tooltip {
+    position: fixed;
+    display: none;
+    z-index: 500;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 11px;
+    color: var(--text);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    pointer-events: none;
+    max-width: 200px;
+    line-height: 1.6;
+  }
+  #element-tooltip strong { display: block; font-size: 13px; margin-bottom: 2px; }
+
+  /* ─── LEGEND ──────────────────────────────────────────── */
+  #legend-panel {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    z-index: 50;
+    max-width: 280px;
+  }
+  .legend-toggle {
+    height: 28px;
+    padding: 0 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 4px;
+    transition: all 0.15s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .legend-toggle:hover { background: var(--bg2); }
+  .legend-body {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: all 0.2s;
+    overflow: hidden;
+  }
+  .legend-body.closed { display: none; }
+  .legend-title { font-size: 10px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+  .leg-row {
+    display: flex; align-items: center; gap: 5px;
+    padding: 3px 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.1s;
+    font-size: 10px;
+    color: var(--text2);
+  }
+  .leg-row:hover { background: var(--bg2); }
+  .leg-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .legend-props { margin-top: 8px; border-top: 1px solid var(--border); padding-top: 8px; }
+
+  /* ─── ELEMENT INFO PANEL ──────────────────────────────── */
+  #info-panel {
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: var(--panel-w);
+    background: var(--bg);
+    border-left: 1px solid var(--border);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    overflow: hidden;
+  }
+  #info-panel.open { transform: translateX(0); }
+
+  .panel-toggle {
+    position: absolute;
+    top: 50%;
+    right: var(--panel-w);
+    transform: translateY(-50%) translateX(100%);
+    z-index: 101;
+    width: 22px;
+    height: 48px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-right: none;
+    border-radius: 6px 0 0 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--text3);
+    transition: all 0.25s;
+    box-shadow: -2px 0 8px rgba(0,0,0,0.05);
+  }
+  #info-panel:not(.open) .panel-toggle { right: 0; transform: translateY(-50%); }
+
+  .panel-scroll { flex: 1; overflow-y: auto; }
+  .panel-scroll::-webkit-scrollbar { width: 4px; }
+  .panel-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .el-header { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); }
+  .el-hero { display: flex; align-items: flex-start; gap: 14px; }
+  .el-symbol-box {
+    width: 64px; height: 64px;
+    border-radius: 10px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    flex-shrink: 0;
+    border: 1.5px solid rgba(0,0,0,0.08);
+  }
+  .el-sym { font-size: 28px; font-weight: 700; line-height: 1; }
+  .el-num { font-size: 10px; opacity: 0.7; }
+  .el-hero-info { flex: 1; }
+  .el-name { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; line-height: 1.1; }
+  .el-name a { color: inherit; text-decoration: none; }
+  .el-name a:hover { text-decoration: underline; }
+  .el-cat-badge {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .el-cat-badge:hover { opacity: 0.8; }
+
+  .panel-section { padding: 14px 20px; border-bottom: 1px solid var(--border); }
+  .panel-section:last-child { border-bottom: none; }
+  .ps-title { font-size: 10px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .props-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .prop-card { background: var(--bg2); border-radius: 6px; padding: 8px 10px; }
+  .prop-label { font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+  .prop-val { font-size: 13px; font-weight: 500; color: var(--text); }
+  .prop-val span { font-size: 10px; color: var(--text3); font-weight: 400; }
+
+  .summary-text { font-size: 12px; color: var(--text2); line-height: 1.7; }
+  .apps-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+  .apps-list li { font-size: 11px; color: var(--text2); padding: 4px 0 4px 14px; position: relative; }
+  .apps-list li::before { content: '→'; position: absolute; left: 0; color: var(--accent); }
+
+  .hazards-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .hazard-tag {
+    display: flex; align-items: center; gap: 4px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 3px 8px;
+    font-size: 10px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .hazard-tag:hover { background: var(--bg3); }
+
+  .shell-config { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .shell-ring { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .shell-badge { width: 32px; height: 32px; border-radius: 50%; border: 2px solid; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
+  .shell-label { font-size: 9px; color: var(--text3); }
+  .el-config-text { font-size: 11px; color: var(--text3); background: var(--bg2); padding: 6px 10px; border-radius: 5px; font-family: 'DM Mono', monospace; }
+
+  .el-img-wrap { text-align: center; }
+  .el-img-wrap img { max-width: 100%; max-height: 160px; border-radius: 8px; cursor: pointer; transition: opacity 0.15s; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .el-img-wrap img:hover { opacity: 0.88; }
+  .el-img-placeholder { width: 100%; height: 100px; background: var(--bg2); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; color: var(--text3); }
+  .img-attr { font-size: 10px; color: var(--text3); margin-top: 5px; line-height: 1.4; }
+
+  .back-full-btn {
+    margin: 14px 20px;
+    width: calc(100% - 40px);
+    height: 36px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .back-full-btn:hover { opacity: 0.88; }
+
+  /* ─── LIGHTBOX ────────────────────────────────────────── */
+  #lightbox {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.82);
+    z-index: 2000;
+    align-items: center; justify-content: center;
+  }
+  #lightbox.open { display: flex; }
+  #lightbox img { max-width: 90vw; max-height: 85vh; border-radius: 8px; user-select: none; }
+  .lb-close {
+    position: absolute; top: 16px; right: 20px;
+    background: rgba(255,255,255,0.15);
+    border: none; border-radius: 50%;
+    width: 36px; height: 36px; cursor: pointer;
+    color: #fff; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .lb-close:hover { background: rgba(255,255,255,0.28); }
+
+  /* ─── LOADING ─────────────────────────────────────────── */
+  #loading-overlay {
+    position: fixed; inset: 0; z-index: 5000;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 14px;
+  }
+  .loading-title { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; color: var(--text); }
+  .loading-sub { font-size: 11px; color: var(--text3); letter-spacing: 1px; }
+  .loading-bar-wrap { width: 200px; height: 3px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
+  .loading-bar { height: 100%; width: 0%; background: var(--accent); border-radius: 2px; transition: width 0.5s; animation: loadpulse 1.5s infinite; }
+  @keyframes loadpulse {
+    0%,100% { opacity: 1; } 50% { opacity: 0.5; }
+  }
+
+  /* ─── CATEGORY PAGE ───────────────────────────────────── */
+  #category-page {
+    display: none;
+    position: absolute; inset: 0;
+    background: var(--bg);
+    overflow-y: auto;
+    z-index: 90;
+    padding: 24px;
+  }
+  #category-page.open { display: block; }
+  .cat-page-title { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .cat-page-sub { font-size: 12px; color: var(--text3); margin-bottom: 20px; }
+  .cat-elements-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+  .cat-el-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--bg);
+  }
+  .cat-el-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-color: var(--border2); }
+  .cat-card-sym { font-size: 24px; font-weight: 700; margin-bottom: 2px; }
+  .cat-card-name { font-size: 10px; color: var(--text3); }
+  .cat-card-num { font-size: 10px; color: var(--text3); }
+
+  /* ─── WATERMARK ───────────────────────────────────────── */
+  .watermark {
+    position: absolute; bottom: 10px; right: 14px;
+    font-size: 10px; color: var(--text3);
+    letter-spacing: 1px; z-index: 5;
+    pointer-events: none;
+  }
+
+  /* ─── SCROLLBAR ───────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading-overlay">
+  <div class="loading-title">⚗ wondermayank</div>
+  <div class="loading-sub">PERIODIC TABLE OF ELEMENTS</div>
+  <div class="loading-bar-wrap"><div class="loading-bar" id="loading-bar"></div></div>
+  <div class="loading-sub" id="loading-status">Loading Three.js...</div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="brand" onclick="goHome()">
+    <span class="brand-atom">⚗</span>
+    <div class="brand-stack">
+      <span>Periodic Table</span>
+      <span class="brand-sub">by wondermayank</span>
+    </div>
+  </div>
+
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Search element, symbol, number…" oninput="handleSearch(this.value)" onfocus="openSearch()" />
+    <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+
+  <div class="header-right">
+    <button class="hdr-btn active" id="btn-table" onclick="setView('table')">⬛ Table</button>
+    <button class="hdr-btn" id="btn-legend" onclick="toggleLegend()">🎨 Legend</button>
+    <a href="https://github.com/wondermayank" target="_blank" rel="noopener" style="text-decoration:none;">
+      <button class="hdr-btn">⌥ GitHub</button>
+    </a>
+  </div>
+</header>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb" id="breadcrumb">
+  <span class="bc-link" onclick="goHome()">Home</span>
+  <span class="bc-sep">›</span>
+  <span class="bc-current" id="bc-current">Periodic Table</span>
+  <button class="back-btn" id="back-btn" style="display:none" onclick="goHome()">← Back</button>
+</div>
+
+<!-- MAIN -->
+<main>
+  <div id="canvas-container"></div>
+  <div id="element-tooltip"></div>
+  <div class="watermark">wondermayank • All 118 Elements</div>
+
+  <!-- LEGEND PANEL -->
+  <div id="legend-panel" style="display:none;">
+    <button class="legend-toggle" onclick="toggleLegend()">
+      🎨 Legend <span id="leg-arrow">▾</span>
+    </button>
+    <div class="legend-body" id="legend-body">
+      <div class="legend-title">Categories</div>
+      <div class="legend-grid" id="legend-cats"></div>
+      <div class="legend-props">
+        <div class="legend-title">Properties</div>
+        <div class="legend-grid" id="legend-props-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATEGORY PAGE -->
+  <div id="category-page">
+    <div class="cat-page-title" id="cat-page-title">Category</div>
+    <div class="cat-page-sub" id="cat-page-sub"></div>
+    <div class="cat-elements-grid" id="cat-elements-grid"></div>
+  </div>
+
+  <!-- INFO PANEL -->
+  <div id="info-panel">
+    <button class="panel-toggle" onclick="togglePanel()" title="Toggle panel">‹</button>
+    <div class="panel-scroll" id="panel-scroll">
+      <div class="el-header" id="panel-header"></div>
+      <button class="back-full-btn" onclick="goHome()">← Back to Periodic Table</button>
+      <div id="panel-body"></div>
+    </div>
+  </div>
+</main>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="closeLightbox()">
+  <button class="lb-close" onclick="closeLightbox()">✕</button>
+  <img id="lb-img" src="" alt="Element image" onclick="event.stopPropagation()">
+</div>
+
+<!-- THREE.JS & ORBIT CONTROLS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// OrbitControls for r128
+(function(){
+  const e=THREE;
+  e.OrbitControls=function(object,domElement){
+    this.object=object;this.domElement=domElement;
+    this.enabled=true;this.enableDamping=true;this.dampingFactor=0.05;
+    this.enableZoom=true;this.zoomSpeed=1.0;
+    this.enableRotate=true;this.rotateSpeed=1.0;
+    this.enablePan=true;this.panSpeed=1.0;
+    this.target=new e.Vector3();
+    let scope=this;
+    let spherical=new e.Spherical();let sphericalDelta=new e.Spherical();
+    let scale=1;let panOffset=new e.Vector3();
+    let rotateStart=new e.Vector2();let rotateEnd=new e.Vector2();let rotateDelta=new e.Vector2();
+    let panStart=new e.Vector2();let panEnd=new e.Vector2();let panDelta=new e.Vector2();
+    let dollyStart=new e.Vector2();let dollyEnd=new e.Vector2();let dollyDelta=new e.Vector2();
+    const STATE={NONE:-1,ROTATE:0,DOLLY:1,PAN:2};let state=STATE.NONE;
+    let EPS=0.000001;
+    function getZoomScale(){return Math.pow(0.95,scope.zoomSpeed);}
+    function rotateLeft(angle){sphericalDelta.theta-=angle;}
+    function rotateUp(angle){sphericalDelta.phi-=angle;}
+    let panLeftV=new e.Vector3();
+    function panLeft(distance,objectMatrix){panLeftV.setFromMatrixColumn(objectMatrix,0);panLeftV.multiplyScalar(-distance);panOffset.add(panLeftV);}
+    let panUpV=new e.Vector3();
+    function panUp(distance,objectMatrix){panUpV.setFromMatrixColumn(objectMatrix,1);panUpV.multiplyScalar(distance);panOffset.add(panUpV);}
+    let panV=new e.Vector3();
+    function pan(deltaX,deltaY){
+      let el=domElement;
+      if(object.isPerspectiveCamera){
+        let pos=object.position;
+        panV.copy(pos).sub(scope.target);
+        let targetDist=panV.length();
+        targetDist*=Math.tan((object.fov/2)*Math.PI/180);
+        panLeft(2*deltaX*targetDist/el.clientHeight,object.matrix);
+        panUp(2*deltaY*targetDist/el.clientHeight,object.matrix);
+      }
+    }
+    function dollyIn(dollyScale){scale/=dollyScale;}
+    function dollyOut(dollyScale){scale*=dollyScale;}
+    this.update=function(){
+      let offset=new e.Vector3();
+      let quat=new e.Quaternion().setFromUnitVectors(object.up,new e.Vector3(0,1,0));
+      let quatInverse=quat.clone().invert();
+      let lastPos=new e.Vector3();
+      let lastQuat=new e.Quaternion();
+      return function(){
+        let pos=scope.object.position;
+        offset.copy(pos).sub(scope.target);
+        offset.applyQuaternion(quat);
+        spherical.setFromVector3(offset);
+        spherical.theta+=sphericalDelta.theta;
+        spherical.phi+=sphericalDelta.phi;
+        spherical.phi=Math.max(EPS,Math.min(Math.PI-EPS,spherical.phi));
+        spherical.makeSafe();
+        spherical.radius*=scale;
+        spherical.radius=Math.max(1,Math.min(200,spherical.radius));
+        scope.target.add(panOffset);
+        offset.setFromSpherical(spherical);
+        offset.applyQuaternion(quatInverse);
+        pos.copy(scope.target).add(offset);
+        scope.object.lookAt(scope.target);
+        if(scope.enableDamping){sphericalDelta.theta*=(1-scope.dampingFactor);sphericalDelta.phi*=(1-scope.dampingFactor);panOffset.multiplyScalar(1-scope.dampingFactor);}
+        else{sphericalDelta.set(0,0,0);panOffset.set(0,0,0);}
+        scale=1;
+        return true;
+      };
+    }();
+    function onMouseDown(e){
+      if(!scope.enabled)return;
+      e.preventDefault();
+      if(e.button===0){state=STATE.ROTATE;rotateStart.set(e.clientX,e.clientY);}
+      else if(e.button===1){state=STATE.DOLLY;dollyStart.set(e.clientX,e.clientY);}
+      else if(e.button===2){state=STATE.PAN;panStart.set(e.clientX,e.clientY);}
+      document.addEventListener('mousemove',onMouseMove,false);
+      document.addEventListener('mouseup',onMouseUp,false);
+    }
+    function onMouseMove(e){
+      if(!scope.enabled)return;
+      if(state===STATE.ROTATE){
+        rotateEnd.set(e.clientX,e.clientY);rotateDelta.subVectors(rotateEnd,rotateStart).multiplyScalar(scope.rotateSpeed);
+        let el=domElement;rotateLeft(2*Math.PI*rotateDelta.x/el.clientHeight);rotateUp(2*Math.PI*rotateDelta.y/el.clientHeight);
+        rotateStart.copy(rotateEnd);
+      } else if(state===STATE.DOLLY){
+        dollyEnd.set(e.clientX,e.clientY);dollyDelta.subVectors(dollyEnd,dollyStart);
+        if(dollyDelta.y>0)dollyIn(getZoomScale());else if(dollyDelta.y<0)dollyOut(getZoomScale());
+        dollyStart.copy(dollyEnd);
+      } else if(state===STATE.PAN){
+        panEnd.set(e.clientX,e.clientY);panDelta.subVectors(panEnd,panStart).multiplyScalar(scope.panSpeed);
+        pan(panDelta.x,panDelta.y);panStart.copy(panEnd);
+      }
+      scope.update();
+    }
+    function onMouseUp(){state=STATE.NONE;document.removeEventListener('mousemove',onMouseMove);document.removeEventListener('mouseup',onMouseUp);}
+    function onWheel(e){
+      e.preventDefault();e.stopPropagation();
+      if(e.deltaY<0)dollyOut(getZoomScale());else dollyIn(getZoomScale());
+      scope.update();
+    }
+    function onContextMenu(e){e.preventDefault();}
+    domElement.addEventListener('contextmenu',onContextMenu,false);
+    domElement.addEventListener('mousedown',onMouseDown,false);
+    domElement.addEventListener('wheel',onWheel,{passive:false});
+    this.dispose=function(){
+      domElement.removeEventListener('contextmenu',onContextMenu);
+      domElement.removeEventListener('mousedown',onMouseDown);
+      domElement.removeEventListener('wheel',onWheel);
+    };
+  };
+})();
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════
+// GLOBAL STATE
+// ═══════════════════════════════════════════════════
+let scene, camera, renderer, controls;
+let periodicTableGroup, atomGroup, elementBoxes={};
+let raycaster, mouse;
+let INTERSECTED = null;
+let elementsData = {};
+let currentView = 'table'; // table | atom | category
+let infoPanelOpen = false;
+let legendOpen = false;
+let currentElement = null;
+
+const LAYOUT = [
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],
+  [3,4,0,0,0,0,0,0,0,0,0,0,5,6,7,8,9,10],
+  [11,12,0,0,0,0,0,0,0,0,0,0,13,14,15,16,17,18],
+  [19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36],
+  [37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54],
+  [55,56,'*',72,73,74,75,76,77,78,79,80,81,82,83,84,85,86],
+  [87,88,'**',104,105,106,107,108,109,110,111,112,113,114,115,116,117,118],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,'*',57,58,59,60,61,62,63,64,65,66,67,68,69,70,71],
+  [0,0,'**',89,90,91,92,93,94,95,96,97,98,99,100,101,102,103],
+];
+
+const CAT_COLORS = {
+  'alkali metal': {hex:0xff8a80, css:'#ff8a80', t:'#7a1206', label:'Alkali Metals'},
+  'alkaline earth metal': {hex:0xff80ab, css:'#ff80ab', t:'#7a0634', label:'Alkaline Earth'},
+  'transition metal': {hex:0xea80fc, css:'#ea80fc', t:'#5e0579', label:'Transition Metals'},
+  'post-transition metal': {hex:0xb388ff, css:'#b388ff', t:'#2a0684', label:'Post-Transition'},
+  'metalloid': {hex:0x8c9eff, css:'#8c9eff', t:'#1a2d8f', label:'Metalloids'},
+  'nonmetal': {hex:0x82b1ff, css:'#82b1ff', t:'#0d3580', label:'Nonmetals'},
+  'diatomic nonmetal': {hex:0x82b1ff, css:'#82b1ff', t:'#0d3580', label:'Nonmetals'},
+  'polyatomic nonmetal': {hex:0x82b1ff, css:'#82b1ff', t:'#0d3580', label:'Nonmetals'},
+  'halogen': {hex:0x80d8ff, css:'#80d8ff', t:'#035579', label:'Halogens'},
+  'noble gas': {hex:0x84ffff, css:'#84ffff', t:'#006464', label:'Noble Gases'},
+  'lanthanide': {hex:0xa7ffeb, css:'#a7ffeb', t:'#005040', label:'Lanthanides'},
+  'actinide': {hex:0xb9f6ca, css:'#b9f6ca', t:'#0a4019', label:'Actinides'},
+  'probably transition metal': {hex:0xea80fc, css:'#ea80fc', t:'#5e0579', label:'Trans. Metals'},
+  'probably post-transition metal': {hex:0xb388ff, css:'#b388ff', t:'#2a0684', label:'Post-Trans.'},
+};
+
+const SHELL_COLORS = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4'];
+
+const HAZARDS = {
+  radioactive: {label:'Radioactive', emoji:'☢️', syms:['U','Pu','Ra','Th','Rn','Po','Tc','Sr','Am','Cf','Cm','Np','Pa','Ac','Pm','Fr','At','Bi','Es','Fm','Md','No','Lr','Rf','Db','Sg','Bh','Hs','Mt','Ds','Rg','Cn','Nh','Fl','Mc','Lv','Ts','Og']},
+  toxic: {label:'Toxic', emoji:'☠️', syms:['Be','As','Pb','Hg','Cd','Tl','Os','Po','Pu','F','Cl','Br','I','Sb','Te','Ba','Cs','Li','Na','K','Rb','V','Cr','Co','Ni','Se','P','U']},
+  flammable: {label:'Flammable', emoji:'🔥', syms:['H','Li','Na','K','Rb','Cs','P','Mg','Al','Fe','Ti','Zr','Ce']},
+  corrosive: {label:'Corrosive', emoji:'🧪', syms:['F','Cl','Br','I','Li','Na','K','Rb','Cs','Fr']},
+  'water-reactive': {label:'Reacts with Water', emoji:'💧', syms:['Li','Na','K','Rb','Cs','Fr','Ca','Sr','Ba']},
+  asphyxiant: {label:'Asphyxiant', emoji:'😮‍💨', syms:['He','Ne','Ar','Kr','Xe','Rn','N','H']},
+  oxidizer: {label:'Oxidizer', emoji:'⚗️', syms:['O','F','Cl','Br']},
+};
+
+const APPS = {
+  H:['Fuel for stars','Hydrogen fuel cells','Petroleum refining'],
+  He:['MRI cooling','Lifting balloons','Deep-sea breathing'],
+  Li:['Lithium-ion batteries','Psychiatric medications','Aerospace alloys'],
+  Be:['Aerospace components','X-ray windows','Nuclear reactors'],
+  B:['Borosilicate glass','Antiseptics','Neutron absorption'],
+  C:['Structural materials','Organic chemistry','Energy storage'],
+  N:['Fertilizers','Cryogenics','Food preservation'],
+  O:['Respiration','Medical use','Steel production'],
+  F:['Toothpaste (fluoride)','Teflon coatings','Refrigerants'],
+  Ne:['Neon signs','Cryogenics','Lasers'],
+  Na:['Table salt (NaCl)','Street lighting','Heat transfer in reactors'],
+  Mg:['Aerospace alloys','Fireworks','Chlorophyll'],
+  Al:['Lightweight structures','Packaging','Electrical wires'],
+  Si:['Semiconductors','Solar cells','Glass production'],
+  P:['Fertilizers','Matches','DNA and RNA'],
+  S:['Sulfuric acid','Rubber vulcanization','Pharmaceuticals'],
+  Cl:['Water purification','PVC plastics','Bleach'],
+  Ar:['Welding','Lighting','Electronics manufacturing'],
+  K:['Fertilizers (potash)','Soap','Gunpowder'],
+  Ca:['Bones & teeth','Cement','Steel production'],
+  Fe:['Structural steel','Hemoglobin','Machinery'],
+  Cu:['Electrical wiring','Plumbing','Coins'],
+  Zn:['Galvanization','Batteries','Dietary supplement'],
+  Ag:['Electronics','Photography','Antimicrobial use'],
+  Au:['Electronics','Jewelry','Dentistry'],
+  Hg:['Thermometers','Fluorescent lamps','Dental amalgams'],
+  Pb:['Lead-acid batteries','Radiation shielding','Historical pipes'],
+  U:['Nuclear fuel','Military','Radiation shielding'],
+};
+
+function getApps(sym) {
+  return APPS[sym] || ['Industrial applications','Scientific research','Chemical processes'];
+}
+
+function getHazards(sym) {
+  return Object.entries(HAZARDS)
+    .filter(([k,v]) => v.syms.includes(sym))
+    .map(([k,v]) => ({type:k, label:v.label, emoji:v.emoji}));
+}
+
+function getCatColor(cat) {
+  return CAT_COLORS[cat?.toLowerCase()] || {hex:0xe6ee9c, css:'#e6ee9c', t:'#4a4e08', label:'Unknown'};
+}
+
+// ═══════════════════════════════════════════════════
+// LOADING PROGRESS
+// ═══════════════════════════════════════════════════
+function setProgress(pct, msg) {
+  document.getElementById('loading-bar').style.width = pct+'%';
+  if (msg) document.getElementById('loading-status').textContent = msg;
+}
+
+// ═══════════════════════════════════════════════════
+// THREE.JS INIT
+// ═══════════════════════════════════════════════════
+function initThree() {
+  setProgress(20, 'Initialising 3D scene…');
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xfafaf8);
+
+  camera = new THREE.PerspectiveCamera(60, window.innerWidth / (window.innerHeight - 92), 0.1, 1000);
+  camera.position.z = 22;
+
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  const h = window.innerHeight - 92;
+  renderer.setSize(window.innerWidth, h);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.06;
+
+  periodicTableGroup = new THREE.Group();
+  atomGroup = new THREE.Group();
+  scene.add(periodicTableGroup);
+  scene.add(atomGroup);
+  atomGroup.visible = false;
+
+  const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambient);
+  const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+  dir.position.set(2,3,4);
+  scene.add(dir);
+
+  raycaster = new THREE.Raycaster();
+  mouse = new THREE.Vector2();
+
+  renderer.domElement.addEventListener('mousemove', onMouseMove);
+  renderer.domElement.addEventListener('click', onMouseClick);
+  renderer.domElement.addEventListener('touchstart', onTouchStart, {passive:false});
+  renderer.domElement.addEventListener('touchend', onTouchEnd, {passive:false});
+
+  window.addEventListener('resize', onResize);
+  animate();
+}
+
+function onResize() {
+  if (!renderer) return;
+  const h = window.innerHeight - 92;
+  camera.aspect = window.innerWidth / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, h);
+}
+
+let touchStartX=0, touchStartY=0;
+function onTouchStart(e) {
+  e.preventDefault();
+  if (e.touches.length===1) {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    updateMouse(e.touches[0].clientX, e.touches[0].clientY);
+  }
+}
+function onTouchEnd(e) {
+  e.preventDefault();
+  if (e.changedTouches.length===1) {
+    const t = e.changedTouches[0];
+    if (Math.abs(t.clientX-touchStartX)<10 && Math.abs(t.clientY-touchStartY)<10) {
+      updateMouse(t.clientX, t.clientY);
+      checkIntersect(true);
+    }
+  }
+}
+
+function updateMouse(x, y) {
+  const rect = renderer.domElement.getBoundingClientRect();
+  mouse.x = ((x - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((y - rect.top) / rect.height) * 2 + 1;
+}
+
+function onMouseMove(e) {
+  updateMouse(e.clientX, e.clientY);
+  checkIntersect(false);
+}
+
+function onMouseClick(e) {
+  updateMouse(e.clientX, e.clientY);
+  checkIntersect(true);
+}
+
+function checkIntersect(isClick) {
+  if (!periodicTableGroup.visible) return;
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(periodicTableGroup.children, false);
+
+  const tooltip = document.getElementById('element-tooltip');
+
+  if (hits.length > 0) {
+    const obj = hits[0].object;
+    if (obj !== INTERSECTED) {
+      if (INTERSECTED) INTERSECTED.material.emissive?.setHex(0x000000);
+      INTERSECTED = obj;
+      if (INTERSECTED.material.emissive) INTERSECTED.material.emissive.setHex(0x222222);
+    }
+    const el = obj.userData.element;
+    if (el) {
+      renderer.domElement.style.cursor = 'pointer';
+      const col = getCatColor(el.category);
+      tooltip.innerHTML = `<strong>${el.name} (${el.symbol})</strong>
+        <div style="font-size:10px;margin-top:3px;">
+          <div>Atomic #: ${el.number}</div>
+          <div>Mass: ${el.atomic_mass}</div>
+          <div style="color:${col.t};background:${col.css};display:inline-block;padding:1px 5px;border-radius:3px;margin-top:3px;font-size:10px;">${el.category}</div>
+        </div>`;
+      tooltip.style.left = (mouse.x * 0 + window.event?.clientX + 14) + 'px';
+      tooltip.style.top = (window.event?.clientY + 14) + 'px';
+      tooltip.style.display = 'block';
+      if (isClick) selectElement(el);
+    }
+  } else {
+    if (INTERSECTED) {
+      INTERSECTED.material.emissive?.setHex(0x000000);
+      INTERSECTED = null;
+    }
+    renderer.domElement.style.cursor = 'grab';
+    tooltip.style.display = 'none';
+  }
+}
+
+// fix tooltip position on mousemove
+document.addEventListener('mousemove', function(e) {
+  const tooltip = document.getElementById('element-tooltip');
+  if (tooltip.style.display === 'block') {
+    tooltip.style.left = (e.clientX + 14) + 'px';
+    tooltip.style.top = (e.clientY + 14) + 'px';
+  }
+});
+
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  if (atomGroup.visible) {
+    atomGroup.traverse(child => {
+      if (child.userData && child.userData.isElectron) {
+        const t = Date.now() * 0.001;
+        const a = child.userData.initialAngle + t * child.userData.rotationSpeed;
+        child.position.x = child.userData.shellRadius * Math.cos(a);
+        child.position.y = child.userData.shellRadius * Math.sin(a);
+      }
+    });
+  }
+  renderer.render(scene, camera);
+}
+
+// ═══════════════════════════════════════════════════
+// ELEMENT DATA LOAD
+// ═══════════════════════════════════════════════════
+async function loadElements() {
+  setProgress(40, 'Fetching element data…');
+  const res = await fetch('https://raw.githubusercontent.com/Bowserinator/Periodic-Table-JSON/master/periodic-table-lookup.json');
+  const data = await res.json();
+  setProgress(65, 'Processing elements…');
+
+  Object.values(data).forEach(el => {
+    if (typeof el === 'object' && el.number) {
+      el.applications = getApps(el.symbol);
+      elementsData[el.number] = el;
+    }
+  });
+
+  // Load images async
+  fetch('https://raw.githubusercontent.com/Bowserinator/Periodic-Table-JSON/master/PeriodicTableJSON.json')
+    .then(r=>r.json()).then(d=>{
+      if (d?.elements) d.elements.forEach(fe=>{
+        if (elementsData[fe.number] && fe.image) elementsData[fe.number].image = fe.image;
+      });
+    }).catch(()=>{});
+
+  setProgress(80, 'Building 3D table…');
+  createPeriodicTable();
+  buildLegend();
+  setProgress(100, 'Ready!');
+  setTimeout(() => {
+    document.getElementById('loading-overlay').style.opacity = '0';
+    document.getElementById('loading-overlay').style.transition = 'opacity 0.4s';
+    setTimeout(() => document.getElementById('loading-overlay').style.display = 'none', 400);
+    document.getElementById('legend-panel').style.display = 'block';
+  }, 300);
+}
+
+// ═══════════════════════════════════════════════════
+// CREATE PERIODIC TABLE 3D
+// ═══════════════════════════════════════════════════
+function makeTextSprite(text, sizePct, canvasW=256) {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvasW; canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,canvasW,256);
+  const fs = Math.round(canvasW * sizePct);
+  ctx.font = `Bold ${fs}px 'DM Mono', monospace`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 3;
+  ctx.strokeText(text, canvasW/2, 128);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(text, canvasW/2, 128);
+  const tex = new THREE.CanvasTexture(canvas);
+  const mat = new THREE.SpriteMaterial({map:tex, transparent:true, alphaTest:0.1, depthTest:false, depthWrite:false});
+  return new THREE.Sprite(mat);
+}
+
+function createPeriodicTable() {
+  const boxSize = 0.88, spacing = 1.0;
+  const startX = -8.5 * spacing, startY = 5 * spacing;
+
+  LAYOUT.forEach((row, r) => {
+    row.forEach((n, c) => {
+      if (!n || n==='*' || n==='**') return;
+      const el = elementsData[n];
+      if (!el) return;
+      const col = getCatColor(el.category);
+      const geo = new THREE.BoxGeometry(boxSize, boxSize, boxSize*0.22);
+      const mat = new THREE.MeshPhongMaterial({
+        color: col.hex, transparent: true, opacity: 0.92,
+        specular: 0x111111, emissive: 0x000000
+      });
+      const box = new THREE.Mesh(geo, mat);
+      box.position.set(startX + c*spacing, startY - r*spacing, 0);
+      box.userData.element = el;
+
+      const sym = makeTextSprite(el.symbol, 0.38);
+      sym.scale.set(0.72,0.72,1); sym.position.set(0,0.05,0.4);
+      box.add(sym);
+
+      const num = makeTextSprite(el.number.toString(), 0.26);
+      num.scale.set(0.35,0.35,1); num.position.set(-0.22,0.26,0.4);
+      box.add(num);
+
+      elementBoxes[n] = box;
+      periodicTableGroup.add(box);
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// ATOMIC MODEL
+// ═══════════════════════════════════════════════════
+function getShellConfig(el) {
+  if (el.shells && Array.isArray(el.shells)) {
+    const out = {};
+    el.shells.forEach((count,i) => { out[i+1] = count; });
+    return out;
+  }
+  // fallback from semantic config
+  const conf = el.electron_configuration_semantic || el.electron_configuration || '';
+  const shells = {};
+  const matches = conf.matchAll(/(\d)s(\d+)/g);
+  let n = 1;
+  for (const m of matches) {
+    const shell = parseInt(m[1]);
+    const count = parseInt(m[2]);
+    if (!shells[shell]) shells[shell] = 0;
+    shells[shell] += count;
+  }
+  if (Object.keys(shells).length === 0) {
+    // basic fallback
+    const maxShells = [2,8,18,32,32,18,8];
+    let remaining = el.number;
+    for (let i=0;i<7&&remaining>0;i++) {
+      const fill = Math.min(remaining, maxShells[i]);
+      shells[i+1] = fill; remaining -= fill;
+    }
+  }
+  return shells;
+}
+
+function makeAtomLabel(text, size, cw=1024) {
+  const canvas = document.createElement('canvas');
+  canvas.width = cw; canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,cw,256);
+  ctx.font = `500 72px 'DM Mono', monospace`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle='rgba(26,25,22,0.85)';
+  ctx.fillText(text, cw/2, 128);
+  const tex = new THREE.CanvasTexture(canvas);
+  const mat = new THREE.SpriteMaterial({map:tex, transparent:true, depthTest:false, depthWrite:false});
+  const spr = new THREE.Sprite(mat);
+  spr.scale.set(size, size*0.25, 1);
+  return spr;
+}
+
+function createAtomicModel(el) {
+  periodicTableGroup.visible = false;
+  atomGroup.visible = true;
+
+  // Clear
+  while (atomGroup.children.length) {
+    const o = atomGroup.children[0];
+    if (o.geometry) o.geometry.dispose();
+    if (o.material) { Array.isArray(o.material)?o.material.forEach(m=>m.dispose()):o.material.dispose(); }
+    atomGroup.remove(o);
+  }
+
+  camera.position.set(0,0,40);
+  controls.target.set(0,0,0);
+  controls.update();
+
+  const col = getCatColor(el.category);
+
+  // Nucleus
+  const nucGeo = new THREE.SphereGeometry(2.2,32,32);
+  const nucMat = new THREE.MeshPhongMaterial({color:col.hex, emissive:0x221100, specular:0xffffff, shininess:40});
+  const nuc = new THREE.Mesh(nucGeo, nucMat);
+  atomGroup.add(nuc);
+
+  // Symbol on nucleus
+  const symSpr = makeTextSprite(el.symbol, 0.5);
+  symSpr.scale.set(2.5,2.5,1); symSpr.position.set(0,0,2.5);
+  nuc.add(symSpr);
+
+  // Shells
+  const shells = getShellConfig(el);
+  let r = 5.5;
+  Object.entries(shells).sort((a,b)=>+a[0]-+b[0]).forEach(([sn, count], si) => {
+    if (!count) return;
+    // ring
+    const torusGeo = new THREE.TorusGeometry(r, 0.10, 16, 100);
+    const torusMat = new THREE.MeshBasicMaterial({color: parseInt(SHELL_COLORS[si%SHELL_COLORS.length].replace('#','0x')), transparent:false});
+    const ring = new THREE.Mesh(torusGeo, torusMat);
+    ring.rotation.x = Math.PI/2;
+    atomGroup.add(ring);
+
+    // electrons
+    const eGeo = new THREE.SphereGeometry(0.35,16,16);
+    const eMat = new THREE.MeshPhongMaterial({color:0x00ccff, emissive:0x0088aa, specular:0xffffff, shininess:40});
+    const shellG = new THREE.Group();
+    shellG.rotation.x = Math.PI/2;
+    atomGroup.add(shellG);
+
+    for (let i=0;i<count;i++) {
+      const angle = (i/count)*Math.PI*2;
+      const e = new THREE.Mesh(eGeo, eMat);
+      e.position.set(r*Math.cos(angle), r*Math.sin(angle), 0);
+      e.userData = {isElectron:true, shellRadius:r, initialAngle:angle, rotationSpeed: 0.5/(0.8+si*0.25)};
+      shellG.add(e);
+    }
+    r += 3;
+  });
+
+  // Labels
+  const nameLbl = makeAtomLabel(`${el.name}`, 18, 1024);
+  nameLbl.position.set(0, r+2, 0);
+  atomGroup.add(nameLbl);
+
+  const mass = parseFloat(el.atomic_mass)||el.number;
+  const neutrons = Math.round(mass) - el.number;
+  const compLbl = makeAtomLabel(`Protons: ${el.number}  |  Neutrons: ${neutrons}  |  Electrons: ${el.number}`, 14, 2048);
+  compLbl.position.set(0, -(r+1), 0);
+  atomGroup.add(compLbl);
+
+  const shellVals = Object.entries(shells).sort((a,b)=>+a[0]-+b[0]).map(([s,c])=>`Shell ${s}: ${c}e⁻`).join('   ');
+  const shellLbl = makeAtomLabel(shellVals, 10, 2048);
+  shellLbl.position.set(0, -(r+4), 0);
+  atomGroup.add(shellLbl);
+}
+
+// ═══════════════════════════════════════════════════
+// VIEW MANAGEMENT
+// ═══════════════════════════════════════════════════
+function setView(v) {
+  currentView = v;
+  document.getElementById('canvas-container').style.display = (v==='category') ? 'none' : 'block';
+  document.getElementById('category-page').classList.toggle('open', v==='category');
+  document.getElementById('legend-panel').style.display = (v==='table') ? 'block' : 'none';
+  document.getElementById('back-btn').style.display = (v!=='table') ? 'block' : 'none';
+
+  // Header buttons
+  document.getElementById('btn-table').classList.toggle('active', v==='table');
+
+  if (v==='table') {
+    periodicTableGroup.visible = true;
+    atomGroup.visible = false;
+    camera.position.set(0,0,22);
+    controls.target.set(0,0,0);
+    controls.update();
+    closePanel();
+  }
+}
+
+function goHome() {
+  setBreadcrumb('Periodic Table', null);
+  setView('table');
+}
+
+function setBreadcrumb(label, sub) {
+  const el = document.getElementById('bc-current');
+  el.textContent = sub ? `${label} › ${sub}` : label;
+}
+
+// ═══════════════════════════════════════════════════
+// ELEMENT SELECTION & PANEL
+// ═══════════════════════════════════════════════════
+function selectElement(el) {
+  currentElement = el;
+  setView('atom');
+  setBreadcrumb(el.name, el.symbol);
+  createAtomicModel(el);
+  fillPanel(el);
+  openPanel();
+}
+
+function fillPanel(el) {
+  const col = getCatColor(el.category);
+
+  // HEADER
+  document.getElementById('panel-header').innerHTML = `
+    <div class="el-hero">
+      <div class="el-symbol-box" style="background:${col.css}20;border-color:${col.css}60;">
+        <div class="el-sym" style="color:${col.t}">${el.symbol}</div>
+        <div class="el-num" style="color:${col.t}">№${el.number}</div>
+      </div>
+      <div class="el-hero-info">
+        <div class="el-name">
+          <a href="https://en.wikipedia.org/wiki/${el.name}" target="_blank" rel="noopener">${el.name} ↗</a>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;">${el.atomic_mass} u</div>
+        <div class="el-cat-badge" style="background:${col.css};color:${col.t};" onclick="showCategory('category','${el.category}')">${el.category}</div>
+      </div>
+    </div>`;
+
+  // BODY
+  const shells = getShellConfig(el);
+  const shellBadges = Object.entries(shells).sort((a,b)=>+a[0]-+b[0]).map(([sn,count],i)=>`
+    <div class="shell-ring">
+      <div class="shell-badge" style="border-color:${SHELL_COLORS[i%SHELL_COLORS.length]};color:${SHELL_COLORS[i%SHELL_COLORS.length]}">${count}</div>
+      <div class="shell-label">n=${sn}</div>
+    </div>
+  `).join('<span style="color:var(--border2);font-size:16px;self-align:center;">›</span>');
+
+  const hazards = getHazards(el.symbol);
+  const hazardHTML = hazards.length
+    ? hazards.map(h=>`<span class="hazard-tag" onclick="showCategory('property','${h.type}')">${h.emoji} ${h.label}</span>`).join('')
+    : '<span style="font-size:11px;color:var(--text3);">No significant hazards</span>';
+
+  const apps = getApps(el.symbol);
+  const appsHTML = apps.map(a=>`<li>${a}</li>`).join('');
+
+  const imgHTML = el.image?.url
+    ? `<img src="${el.image.url}" alt="${el.name}" onclick="openLightbox('${el.image.url}')" onerror="this.parentNode.innerHTML='<div class=\'el-img-placeholder\'>${el.symbol}</div>'">
+       ${el.image.attribution ? `<div class="img-attr">${el.image.attribution}</div>` : ''}`
+    : `<div class="el-img-placeholder">${el.symbol}</div>`;
+
+  document.getElementById('panel-body').innerHTML = `
+    <div class="panel-section">
+      <div class="ps-title">Properties</div>
+      <div class="props-grid">
+        <div class="prop-card"><div class="prop-label">Atomic Mass</div><div class="prop-val">${el.atomic_mass} <span>u</span></div></div>
+        <div class="prop-card"><div class="prop-label">Phase</div><div class="prop-val">${el.phase||'—'}</div></div>
+        <div class="prop-card"><div class="prop-label">Melting Pt</div><div class="prop-val">${el.melt!=null?el.melt+' K':'—'}</div></div>
+        <div class="prop-card"><div class="prop-label">Boiling Pt</div><div class="prop-val">${el.boil!=null?el.boil+' K':'—'}</div></div>
+        <div class="prop-card"><div class="prop-label">Density</div><div class="prop-val">${el.density!=null?el.density+' g/cm³':'—'}</div></div>
+        <div class="prop-card"><div class="prop-label">Electronegativity</div><div class="prop-val">${el.electronegativity_pauling!=null?el.electronegativity_pauling:'—'}</div></div>
+        <div class="prop-card"><div class="prop-label">Electron Affinity</div><div class="prop-val">${el.electron_affinity!=null?el.electron_affinity+' kJ/mol':'—'}</div></div>
+        <div class="prop-card"><div class="prop-label">Ionization</div><div class="prop-val">${el.ionization_energies?.length?el.ionization_energies[0]+' kJ/mol':'—'}</div></div>
+      </div>
+    </div>
+    <div class="panel-section">
+      <div class="ps-title">Electron Configuration</div>
+      <div class="shell-config">${shellBadges}</div>
+      <div class="el-config-text">${el.electron_configuration_semantic || el.electron_configuration || '—'}</div>
+    </div>
+    <div class="panel-section">
+      <div class="ps-title">Summary</div>
+      <div class="summary-text">${el.summary || 'No summary available.'}</div>
+    </div>
+    <div class="panel-section">
+      <div class="ps-title">Applications</div>
+      <ul class="apps-list">${appsHTML}</ul>
+    </div>
+    <div class="panel-section">
+      <div class="ps-title">Hazards</div>
+      <div class="hazards-row">${hazardHTML}</div>
+    </div>
+    <div class="panel-section">
+      <div class="ps-title">Discovery</div>
+      <div class="props-grid">
+        <div class="prop-card"><div class="prop-label">Discovered by</div><div class="prop-val" style="font-size:11px;">${el.discovered_by||'Unknown'}</div></div>
+        <div class="prop-card"><div class="prop-label">Named by</div><div class="prop-val" style="font-size:11px;">${el.named_by||'—'}</div></div>
+      </div>
+    </div>
+    <div class="panel-section">
+      <div class="ps-title">Element Image</div>
+      <div class="el-img-wrap">${imgHTML}</div>
+    </div>
+  `;
+}
+
+function openPanel() {
+  infoPanelOpen = true;
+  document.getElementById('info-panel').classList.add('open');
+  document.querySelector('.panel-toggle').textContent = '›';
+}
+function closePanel() {
+  infoPanelOpen = false;
+  document.getElementById('info-panel').classList.remove('open');
+  document.querySelector('.panel-toggle').textContent = '‹';
+}
+function togglePanel() {
+  infoPanelOpen ? closePanel() : openPanel();
+}
+
+// ═══════════════════════════════════════════════════
+// LIGHTBOX
+// ═══════════════════════════════════════════════════
+function openLightbox(url) {
+  document.getElementById('lb-img').src = url;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════════
+// LEGEND
+// ═══════════════════════════════════════════════════
+function buildLegend() {
+  const cats = {
+    'alkali metal':'Alkali Metals', 'alkaline earth metal':'Alkaline Earth',
+    'transition metal':'Transition Metals', 'post-transition metal':'Post-Transition',
+    'metalloid':'Metalloids', 'nonmetal':'Nonmetals / Diatomic',
+    'halogen':'Halogens', 'noble gas':'Noble Gases',
+    'lanthanide':'Lanthanides', 'actinide':'Actinides',
+  };
+  const grid = document.getElementById('legend-cats');
+  grid.innerHTML = Object.entries(cats).map(([k,v])=>`
+    <div class="leg-row" onclick="showCategory('category','${k}')">
+      <div class="leg-dot" style="background:${getCatColor(k).css}"></div>${v}
+    </div>`).join('');
+
+  const props = Object.entries(HAZARDS).slice(0,6);
+  document.getElementById('legend-props-grid').innerHTML = props.map(([k,v])=>`
+    <div class="leg-row" onclick="showCategory('property','${k}')">
+      <span>${v.emoji}</span>${v.label}
+    </div>`).join('');
+}
+
+function toggleLegend() {
+  legendOpen = !legendOpen;
+  document.getElementById('legend-body').classList.toggle('closed', !legendOpen);
+  document.getElementById('leg-arrow').textContent = legendOpen ? '▾' : '▸';
+}
+
+// ═══════════════════════════════════════════════════
+// CATEGORY PAGE
+// ═══════════════════════════════════════════════════
+function showCategory(type, name) {
+  setView('category');
+  setBreadcrumb(name, null);
+
+  const catMap = {
+    nonmetal: ['diatomic nonmetal','polyatomic nonmetal'],
+    'transition metal': ['transition metal','probably transition metal'],
+    'post-transition metal': ['post-transition metal','probably post-transition metal'],
+  };
+
+  let els;
+  if (type === 'category') {
+    const variants = catMap[name.toLowerCase()] || [name.toLowerCase()];
+    els = Object.values(elementsData).filter(e=>variants.includes(e.category?.toLowerCase())||e.category?.toLowerCase()===name.toLowerCase());
+  } else {
+    const hz = HAZARDS[name];
+    els = hz ? Object.values(elementsData).filter(e=>hz.syms.includes(e.symbol)) : [];
+  }
+
+  const col = type==='category' ? getCatColor(name) : {css:'#f0f0f0',t:'#333'};
+  document.getElementById('cat-page-title').textContent = name.charAt(0).toUpperCase()+name.slice(1);
+  document.getElementById('cat-page-sub').textContent = `${els.length} elements`;
+  document.getElementById('cat-elements-grid').innerHTML = els.sort((a,b)=>a.number-b.number).map(e=>`
+    <div class="cat-el-card" onclick="selectElement(elementsData[${e.number}])" style="border-color:${col.css}40;">
+      <div class="cat-card-sym" style="color:${col.t||'#333'}">${e.symbol}</div>
+      <div class="cat-card-name">${e.name}</div>
+      <div class="cat-card-num">№${e.number}</div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// SEARCH
+// ═══════════════════════════════════════════════════
+function handleSearch(val) {
+  const clearBtn = document.getElementById('searchClear');
+  clearBtn.style.display = val ? 'block' : 'none';
+  const res = document.getElementById('searchResults');
+  if (!val.trim()) { res.classList.remove('open'); return; }
+
+  const q = val.toLowerCase();
+  const els = Object.values(elementsData).filter(e=>
+    e.name?.toLowerCase().includes(q) ||
+    e.symbol?.toLowerCase().includes(q) ||
+    String(e.number).includes(q) ||
+    e.category?.toLowerCase().includes(q)
+  ).slice(0,12);
+
+  if (!els.length) { res.innerHTML='<div class="sr-section">No results found</div>'; res.classList.add('open'); return; }
+
+  res.innerHTML = `<div class="sr-section">Elements (${els.length})</div>` + els.map(e=>{
+    const col = getCatColor(e.category);
+    return `<div class="sr-item" onclick="selectElement(elementsData[${e.number}]); closeSearch();">
+      <div class="sr-sym" style="background:${col.css};color:${col.t}">${e.symbol}</div>
+      <div class="sr-info">
+        <div class="sr-name">${e.name}</div>
+        <div class="sr-meta">№${e.number} · ${e.category} · ${e.atomic_mass} u</div>
+      </div>
+    </div>`;
+  }).join('');
+  res.classList.add('open');
+}
+
+function openSearch() {
+  const val = document.getElementById('searchInput').value;
+  if (val) handleSearch(val);
+}
+function closeSearch() {
+  document.getElementById('searchResults').classList.remove('open');
+}
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchClear').style.display = 'none';
+  document.getElementById('searchResults').classList.remove('open');
+}
+
+document.addEventListener('click', e=>{
+  if (!e.target.closest('.search-wrap')) closeSearch();
+});
+
+// ═══════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  initThree();
+  loadElements().catch(err=>{
+    document.getElementById('loading-status').textContent = 'Error loading data. Please refresh.';
+    console.error(err);
+  });
+  toggleLegend(); // open legend by default
+});
+</script>
+</body>
+</html>
